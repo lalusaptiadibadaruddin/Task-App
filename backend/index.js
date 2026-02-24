@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.listen(3000, () => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
