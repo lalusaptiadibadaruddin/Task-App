@@ -6,7 +6,11 @@ import AuthLayout from "../../components/AuthLayout";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axioInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { signInStart, signInSuccess } from "../../redux/slice/userSlice";
+import {
+  signInFailure,
+  signInStart,
+  signInSuccess,
+} from "../../redux/slice/userSlice";
 
 // import { useSelector } from "react-redux";
 
@@ -55,8 +59,10 @@ const Login = () => {
     } catch (error) {
       if (error.response && error.response.data.message) {
         setError(error.response.data.message);
+        dispatch(signInFailure(error.response.data.message));
       } else {
         setError("Something went wrong. Please try again!");
+        dispatch(signInFailure("Something went wrong. Please try again!"));
       }
     }
   };
