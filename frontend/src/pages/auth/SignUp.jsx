@@ -2,17 +2,71 @@ import React, { useState } from "react";
 import AuthLayout from "../../components/AuthLayout";
 import { FaEyeSlash, FaPeopleGroup } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { validateEmail } from "../../utils/helper";
+import ProfilePhotoSelector from "../../components/ProfilePhotoSelector";
+import uploadImage from "../../utils/uploadImage";
+import axiosInstance from "../../utils/axioInstance";
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+  const [profilePic, setProfilePic] = useState(null);
+  const [adminInviteToken, setAdminInviteToken] = useState("");
+  const [showAdminInviteToken, setShowAdminInviteToken] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    let profileImageUrl = "";
+
+    if (!fullName) {
+      setError("Please enter the name");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter the password");
+      return;
+    }
+
+    setError(null);
+
+    // SignUp API call
+    try {
+      // Upload profile picture if present
+      if (profilePic) {
+        const imageUploadRes = await uploadImage(profilePic);
+        profileImageUrl = imageUploadRes.imageUrl || "";
+        const response = await axiosInstance.post("/auth/sign-up", {
+          name: fullName,
+          email,
+          password,
+          profileImageUrl,
+          adminJoinCode: adminInviteToken,
+        });
+
+        if (response.data) {
+          navigate("/login");
+        }
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong. Please try again!");
+      }
+    }
   };
   return (
     <AuthLayout>
@@ -40,6 +94,10 @@ const SignUp = () => {
 
             {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
+              <ProfilePhotoSelector
+                image={profilePic}
+                setImage={setProfilePic}
+              />
               <div>
                 <label
                   htmlFor="email"
@@ -102,6 +160,34 @@ const SignUp = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Admin Invite Token
+                </label>
+
+                <div className="relative">
+                  <input
+                    id="adminInviteTokem"
+                    type={showAdminInviteToken ? "text" : "password"}
+                    value={adminInviteToken}
+                    onChange={(e) => setAdminInviteToken(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+                    placeholder="•••••••"
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                    onClick={() =>
+                      setShowAdminInviteToken(!showAdminInviteToken)
+                    }
+                  >
+                    {showAdminInviteToken ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
               </div>
