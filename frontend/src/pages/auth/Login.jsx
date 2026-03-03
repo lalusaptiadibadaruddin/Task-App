@@ -5,16 +5,21 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axioInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { signInStart, signInSuccess } from "../../redux/slice/userSlice";
 
 // import { useSelector } from "react-redux";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
+
+  const { loading } = useSelector((state) => state.user);
 
   // const { loading } = useSelector((state) => state.user);
 
@@ -33,14 +38,18 @@ const Login = () => {
     setError(null);
 
     try {
+      dispatch(signInStart());
+
       const response = await axiosInstance.post("/auth/sign-in", {
         email,
         password,
       });
       // console.log(response.data);
       if (response.data.role === "admin") {
+        dispatch(signInSuccess(response.data));
         navigate("/admin/dashboard");
       } else {
+        dispatch(signInSuccess(response.data));
         navigate("/user/dashboard");
       }
     } catch (error) {
@@ -126,14 +135,20 @@ const Login = () => {
 
               {error && <p className="text-red-500 text-sm">{error}</p>}
 
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-0 focus:ring-offset-0 cursor-pointer"
-                >
-                  LOGIN
-                </button>
-              </div>
+              {loading ? (
+                <span className="animate-pulse w-full text-center bg-blue-600 text-white">
+                  Loading...
+                </span>
+              ) : (
+                <div>
+                  <button
+                    type="submit"
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                  >
+                    LOGIN
+                  </button>
+                </div>
+              )}
             </form>
 
             <div className="mt-6 text-center text-sm">
