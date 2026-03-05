@@ -6,10 +6,15 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import taskRoutes from "./routes/task.route.js";
 import reportRoutes from "./routes/report.route.js";
-
 import cookieParser from "cookie-parser";
+import path from "path";
+
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -47,6 +52,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/reports", reportRoutes);
+
+// serve static files from "uploads" folder
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
