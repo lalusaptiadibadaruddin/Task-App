@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import { MdDelete } from "react-icons/md";
@@ -34,7 +34,7 @@ const CreateTask = () => {
   const [currentTask, setCurrentTask] = useState(null);
 
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
 
@@ -60,18 +60,21 @@ const CreateTask = () => {
 
   // create task
   const createTask = async () => {
+    console.log("createTask dipanggil"); // Tambahkan ini
     try {
       const todolist = taskData.todoChecklist?.map((item) => ({
         text: item,
         completed: false,
       }));
 
+      console.log("Mengirim request..."); // Tambahkan ini
       const response = await axiosInstance.post("/tasks/create", {
         ...taskData,
         dueDate: new Date(taskData.dueDate).toISOString(),
         todoChecklist: todolist,
       });
 
+      console.log("Response sukses:", response); // Tambahkan ini
       toast.success("Task created successfully!");
 
       clearData();
@@ -85,6 +88,7 @@ const CreateTask = () => {
 
   // update task
   const updateTask = async () => {
+    // console.log("createTask dipanggil"); // Tambahkan ini
     try {
       const todolist = taskData.todoChecklist?.map((item) => {
         const prevTodoChecklist = currentTask?.todoChecklist || [];
@@ -98,15 +102,17 @@ const CreateTask = () => {
         };
       });
 
+      // console.log("Mengirim request..."); // Tambahkan ini
       const response = await axiosInstance.put(`/tasks/${taskId}`, {
         ...taskData,
         dueDate: new Date(taskData.dueDate).toISOString(),
         todoChecklist: todolist,
       });
 
+      // console.log("Response sukses:", response); // Tambahkan ini
       toast.success("Task updated successfully!");
 
-      console.log(response.data);
+      // console.log(response.data);
     } catch (error) {
       console.log("Error updating task: ", error);
       toast.error("Error updating task!");
